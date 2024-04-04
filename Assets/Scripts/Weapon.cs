@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,16 +9,20 @@ public class Weapon : MonoBehaviour
 {
     private Camera playerCamera;
     private Animator anim;
-    public ParticleSystem muzzleEffect;
+    public WeaponModel model;
     
+    
+   
     [Header("Shooting")]
-    private bool isShooting, readyToShoot;
-    private bool allowReset = true;
     public float shootingDelay = 2f;
     public float spreadIntensity;
+    public float ADSSpreadIntensity;
     public ShootingMode currentShootingMode;
     public int bulletsPerBurst = 3;
     private int burstBulletsLeft;
+    private bool isShooting, readyToShoot;
+    private bool allowReset = true;
+    private bool ADS;
     
     
     [Header("Bullet")]
@@ -25,6 +30,15 @@ public class Weapon : MonoBehaviour
     public Transform bulletSpawn;
     public float bulletVelocity = 30;
     public float bulletPrefabLifetime = 3f;
+    public ParticleSystem muzzleEffect;
+    
+    [Header("Reload")]
+    public float reloadTime;
+    public int magazineSize;
+    internal int bulletsleft;
+    internal bool isReloading;
+    public int totalAmmo;
+    public int maxAmmoAmmount;
 
     public enum ShootingMode
     {
@@ -32,9 +46,15 @@ public class Weapon : MonoBehaviour
         Burst,
         Auto,
     }
+    public enum WeaponModel
+    {
+        Pistol,
+        M4,
+    }
 
     private void Awake()
     {
+        bulletsleft = magazineSize;
         readyToShoot = true;
         burstBulletsLeft = bulletsPerBurst;
         playerCamera = Camera.main;
@@ -44,6 +64,11 @@ public class Weapon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (bulletsleft == 0 && isShooting)
+        {
+            SoundManager.instance.EmptyMagazine.Play();
+        }
+        
         isShooting = currentShootingMode switch
         {
             ShootingMode.Auto => Input.GetKey(KeyCode.Mouse0), //can hold it down
@@ -51,15 +76,42 @@ public class Weapon : MonoBehaviour
             _ => isShooting
         };
 
-        if (readyToShoot && isShooting)
+        if (readyToShoot && isShooting && !isReloading && bulletsleft > 0)
         {
             burstBulletsLeft = bulletsPerBurst;
             FireWeapon();
+        }
+
+        //manual reload
+        if (Input.GetKeyDown(KeyCode.R) && bulletsleft < magazineSize && !isReloading && totalAmmo > 0)
+        {
+            Reload();
+        }
+
+        //automatic reload
+        if (readyToShoot && !isShooting && !isReloading && bulletsleft <= 0)
+        {
+            //Reload();
+        }
+        
+        //ADS
+        if (Input.GetMouseButton(1))
+        {
+            anim.SetBool("ADS",true);
+            ADS = true;
+            HUDManager.instance.littleDot.SetActive(false);
+        }
+        else
+        {
+            anim.SetBool("ADS",false);
+            ADS = false;
+            HUDManager.instance.littleDot.SetActive(true);
         }
     }
 
     private void FireWeapon()
     {
+        bulletsleft -= bulletsleft > 0 ? 1 : 0;
         readyToShoot = false;
         Vector3 shootingDirection = CalculateDirectionAndSpread().normalized;
         
@@ -72,8 +124,15 @@ public class Weapon : MonoBehaviour
         //shoot
         bullet.GetComponent<Rigidbody>().AddForce(shootingDirection * bulletVelocity,ForceMode.Impulse);
         muzzleEffect.Play();
-        anim.SetTrigger("Fire");
-        SoundManager.instance.pistolShootingSound.Play();
+        if (ADS)
+        {
+            anim.SetTrigger("ADSFire");
+        }
+        else
+        {
+            anim.SetTrigger("Fire");
+        }
+        SoundManager.instance.PlayShootingSound(model);
         
         //destroy after some time
         Destroy(bullet,bulletPrefabLifetime);
@@ -91,6 +150,28 @@ public class Weapon : MonoBehaviour
             burstBulletsLeft--;
             Invoke(nameof(FireWeapon),shootingDelay);
         }
+    }
+
+    private int ammoToReload;
+    private void Reload()
+    {
+        isReloading = true;
+        totalAmmo -= magazineSize - bulletsleft;
+        ammoToReload = magazineSize;
+        if (totalAmmo < 0)
+        {
+            ammoToReload = magazineSize+totalAmmo;
+            totalAmmo = 0;
+        }
+        SoundManager.instance.playReloadSound(model);
+        anim.SetTrigger("Reload");
+        Invoke("RealoadCompleted",reloadTime);
+    }
+
+    private void RealoadCompleted()
+    {
+        bulletsleft = ammoToReload;
+        isReloading = false;
     }
 
     private void ResetShot()
@@ -119,9 +200,9 @@ public class Weapon : MonoBehaviour
         
         //randomness
         Vector3 direction = targetpoint - bulletSpawn.position;
-        float x = Random.Range(-spreadIntensity, spreadIntensity);
-        float y = Random.Range(-spreadIntensity, spreadIntensity);
+        float z = Random.Range(-(ADS ? ADSSpreadIntensity : spreadIntensity), ADS ? ADSSpreadIntensity : spreadIntensity);
+        float y = Random.Range(-(ADS ? ADSSpreadIntensity : spreadIntensity), ADS ? ADSSpreadIntensity : spreadIntensity);
         
-        return direction + new Vector3(x, y, 0f);
+        return direction + new Vector3(0f, y, z);
     }
 }
