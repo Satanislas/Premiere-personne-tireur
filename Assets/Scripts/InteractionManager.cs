@@ -32,8 +32,9 @@ public class InteractionManager : MonoBehaviour
         {
             if (hit.transform.gameObject.CompareTag("Weapon"))
             {
+                if (weapon) weapon.GetComponent<Outline>().enabled = false;
+                
                 weapon = hit.transform.gameObject;
-                Debug.Log("Weapon selected");
                 weapon.GetComponent<Outline>().enabled = true;
                 
                 if (Input.GetKeyDown(KeyCode.E))
@@ -52,6 +53,7 @@ public class InteractionManager : MonoBehaviour
             //Ammo Box
             if (hit.transform.gameObject.CompareTag("AmmoBox"))
             {
+                if (AmmoBox) AmmoBox.GetComponent<Outline>().enabled = false;
                 AmmoBox = hit.transform.gameObject;
                 Debug.Log("AmmoBox selected");
                 AmmoBox.GetComponent<Outline>().enabled = true;
@@ -72,6 +74,7 @@ public class InteractionManager : MonoBehaviour
             //Throwable
             if (hit.transform.GetComponent<Throwable>())
             {
+                if (throwable) throwable.GetComponent<Outline>().enabled = false;
                 throwable = hit.transform.gameObject;
                 Debug.Log("throwable selected");
                 throwable.GetComponent<Outline>().enabled = true;

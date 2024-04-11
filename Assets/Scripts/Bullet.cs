@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public int damage;
+    
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("Target"))
@@ -22,6 +24,25 @@ public class Bullet : MonoBehaviour
             
             Destroy(gameObject);
         }
+
+
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            other.gameObject.GetComponent<Enemy>().TakeDamage(damage);
+
+            CreateBloodEffect(other);
+            
+            Destroy(gameObject);
+        }
+    }
+
+    private void CreateBloodEffect(Collision hit)
+    {
+        ContactPoint contact = hit.contacts[0];
+
+        GameObject blood = Instantiate(GlobalReferences.instance.ZombieBloodEffect,contact.point,Quaternion.LookRotation(contact.normal));
+        
+        blood.transform.SetParent(hit.transform);
     }
 
     void CreateBulletImpactEffect(Collision hit)

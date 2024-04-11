@@ -94,6 +94,10 @@ public class Throwable : MonoBehaviour
                 hit.GetComponent<Rigidbody>().AddExplosionForce(explosionForce,transform.position,damageRadius);
             }
             //apply damage to enemies
+            if (hit.GetComponent<Enemy>())
+            {
+                hit.GetComponent<Enemy>().TakeDamage(100);
+            }
         }
     }
 }

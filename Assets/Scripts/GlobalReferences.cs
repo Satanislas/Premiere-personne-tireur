@@ -12,6 +12,7 @@ public class GlobalReferences : MonoBehaviour
 
     public GameObject grenadeExplosionEffect;
     public GameObject smokeExplosionEffect;
+    public GameObject ZombieBloodEffect;
     
     private void Start()
     {

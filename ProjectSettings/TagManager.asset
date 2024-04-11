@@ -8,6 +8,10 @@ TagManager:
   - Wall
   - Weapon
   - AmmoBox
+  - Zombie
+  - Enemy
+  - Waypoint
+  - ZombieHand
   layers:
   - Default
   - TransparentFX

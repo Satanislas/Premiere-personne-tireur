@@ -31,6 +31,7 @@ public class Weapon : MonoBehaviour
     public float bulletVelocity = 30;
     public float bulletPrefabLifetime = 3f;
     public ParticleSystem muzzleEffect;
+    public int weaponDamage;
     
     [Header("Reload")]
     public float reloadTime;
@@ -117,6 +118,7 @@ public class Weapon : MonoBehaviour
         
         //instantiate the bullet
         GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, Quaternion.identity);
+        bullet.GetComponent<Bullet>().damage = weaponDamage;
         
         //poiting the bullet to face the shooting direction
         bullet.transform.forward = shootingDirection;

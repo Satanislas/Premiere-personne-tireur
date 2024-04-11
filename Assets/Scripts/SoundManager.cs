@@ -21,6 +21,19 @@ public class SoundManager : MonoBehaviour
 
     [Header("Throwables")] public AudioSource throwableChannel;
     public AudioClip grenadeExplosion;
+
+    [Header("Zombie")] public AudioSource ZombieChannel;
+    public AudioSource ZombieChannel2;
+    public AudioClip ZWalking;
+    public AudioClip ZChase;
+    public AudioClip ZAttack;
+    public AudioClip ZHurt;
+    public AudioClip ZDeath;
+
+    [Header("Player")] public AudioSource playerChannel;
+    public AudioClip playerHit;
+    public AudioClip playerDeath;
+    
     
     
     
